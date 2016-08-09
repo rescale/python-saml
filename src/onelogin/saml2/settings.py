@@ -106,7 +106,7 @@ class OneLogin_Saml2_Settings(object):
         else:
             raise Exception('Unsupported settings object')
 
-        self.format_idp_cert()
+        self.format_idp_certs()
         self.format_sp_cert()
         self.format_sp_key()
 
@@ -283,7 +283,7 @@ class OneLogin_Saml2_Settings(object):
         # AttributeStatement required by default
         self.__security.setdefault('wantAttributeStatement', True)
 
-        self.__idp.setdefault('x509cert', '')
+        self.__idp.setdefault('x509certs', [])
         self.__idp.setdefault('certFingerprint', '')
         self.__idp.setdefault('certFingerprintAlgorithm', 'sha1')
 
@@ -350,7 +350,7 @@ class OneLogin_Saml2_Settings(object):
                 if 'security' in settings:
                     security = settings['security']
 
-                    exists_x509 = bool(idp.get('x509cert'))
+                    exists_x509 = bool(idp.get('x509certs'))
                     exists_fingerprint = bool(idp.get('certFingerprint'))
 
                     want_assert_sign = bool(security.get('wantAssertionsSigned'))
@@ -516,14 +516,14 @@ class OneLogin_Saml2_Settings(object):
 
         return cert or None
 
-    def get_idp_cert(self):
+    def get_idp_certs(self):
         """
         Returns the x509 public cert of the IdP.
 
         :returns: IdP public cert
         :rtype: string
         """
-        return self.__idp.get('x509cert')
+        return self.__idp.get('x509certs')
 
     def get_idp_data(self):
         """
@@ -684,11 +684,12 @@ class OneLogin_Saml2_Settings(object):
 
         return errors
 
-    def format_idp_cert(self):
+    def format_idp_certs(self):
         """
         Formats the IdP cert.
         """
-        self.__idp['x509cert'] = OneLogin_Saml2_Utils.format_cert(self.__idp['x509cert'])
+        self.__idp['x509certs'] = [OneLogin_Saml2_Utils.format_cert(cert)
+                                   for cert in self.__idp['x509certs']]
 
     def format_sp_cert(self):
         """

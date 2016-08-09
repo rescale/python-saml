@@ -199,7 +199,7 @@ class OneLogin_Saml2_Response(object):
             if len(signed_elements) > 0:
                 if len(signed_elements) > 2:
                     raise Exception('Too many Signatures found. SAML Response rejected')
-                cert = idp_data.get('x509cert', None)
+                certs = idp_data.get('x509certs', [])
                 fingerprint = idp_data.get('certFingerprint', None)
                 fingerprintalg = idp_data.get('certFingerprintAlgorithm', None)
 
@@ -212,7 +212,12 @@ class OneLogin_Saml2_Response(object):
                         document_to_validate = self.decrypted_document
                     else:
                         document_to_validate = self.document
-                if not OneLogin_Saml2_Utils.validate_sign(document_to_validate, cert, fingerprint, fingerprintalg):
+                if certs:
+                    validated = any(OneLogin_Saml2_Utils.validate_sign(document_to_validate, cert, fingerprint, fingerprintalg)
+                                    for cert in certs)
+                else:
+                    validated = OneLogin_Saml2_Utils.validate_sign(document_to_validate, None, fingerprint, fingerprintalg)
+                if not validated:
                     raise Exception('Signature validation failed. SAML Response rejected')
             else:
                 raise Exception('No Signature found. SAML Response rejected')

@@ -74,22 +74,23 @@ class OneLogin_Saml2_Utils_Test(unittest.TestCase):
         Tests the format_cert method of the OneLogin_Saml2_Utils
         """
         settings_info = self.loadSettingsJSON()
-        cert = settings_info['idp']['x509cert']
-        self.assertNotIn('-----BEGIN CERTIFICATE-----', cert)
-        self.assertNotIn('-----END CERTIFICATE-----', cert)
-        self.assertEqual(len(cert), 860)
+        certs = settings_info['idp']['x509certs']
+        for cert in certs:
+            self.assertNotIn('-----BEGIN CERTIFICATE-----', cert)
+            self.assertNotIn('-----END CERTIFICATE-----', cert)
+            self.assertEqual(len(cert), 860)
 
-        formated_cert1 = OneLogin_Saml2_Utils.format_cert(cert)
-        self.assertIn('-----BEGIN CERTIFICATE-----', formated_cert1)
-        self.assertIn('-----END CERTIFICATE-----', formated_cert1)
+            formated_cert1 = OneLogin_Saml2_Utils.format_cert(cert)
+            self.assertIn('-----BEGIN CERTIFICATE-----', formated_cert1)
+            self.assertIn('-----END CERTIFICATE-----', formated_cert1)
 
-        formated_cert2 = OneLogin_Saml2_Utils.format_cert(cert, True)
-        self.assertEqual(formated_cert1, formated_cert2)
+            formated_cert2 = OneLogin_Saml2_Utils.format_cert(cert, True)
+            self.assertEqual(formated_cert1, formated_cert2)
 
-        formated_cert3 = OneLogin_Saml2_Utils.format_cert(cert, False)
-        self.assertNotIn('-----BEGIN CERTIFICATE-----', formated_cert3)
-        self.assertNotIn('-----END CERTIFICATE-----', formated_cert3)
-        self.assertEqual(len(formated_cert3), 860)
+            formated_cert3 = OneLogin_Saml2_Utils.format_cert(cert, False)
+            self.assertNotIn('-----BEGIN CERTIFICATE-----', formated_cert3)
+            self.assertNotIn('-----END CERTIFICATE-----', formated_cert3)
+            self.assertEqual(len(formated_cert3), 860)
 
     def testFormatPrivateKey(self):
         """
@@ -609,12 +610,13 @@ class OneLogin_Saml2_Utils_Test(unittest.TestCase):
         self.assertEqual(name_id, expected_name_id)
 
         settings_info = self.loadSettingsJSON()
-        x509cert = settings_info['idp']['x509cert']
-        key = OneLogin_Saml2_Utils.format_cert(x509cert)
+        x509certs = settings_info['idp']['x509certs']
+        for x509cert in x509certs:
+            key = OneLogin_Saml2_Utils.format_cert(x509cert)
 
-        name_id_enc = OneLogin_Saml2_Utils.generate_name_id(name_id_value, entity_id, name_id_format, key)
-        expected_name_id_enc = '<saml:EncryptedID><xenc:EncryptedData Type="http://www.w3.org/2001/04/xmlenc#Element" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/><dsig:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#"><xenc:EncryptedKey><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/><xenc:CipherData><xenc:CipherValue>'
-        self.assertIn(expected_name_id_enc, name_id_enc)
+            name_id_enc = OneLogin_Saml2_Utils.generate_name_id(name_id_value, entity_id, name_id_format, key)
+            expected_name_id_enc = '<saml:EncryptedID><xenc:EncryptedData Type="http://www.w3.org/2001/04/xmlenc#Element" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/><dsig:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#"><xenc:EncryptedKey><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/><xenc:CipherData><xenc:CipherValue>'
+            self.assertIn(expected_name_id_enc, name_id_enc)
 
     def testGenerateNameIdWithoutSPNameQualifier(self):
         """
@@ -628,12 +630,13 @@ class OneLogin_Saml2_Utils_Test(unittest.TestCase):
         self.assertEqual(name_id, expected_name_id)
 
         settings_info = self.loadSettingsJSON()
-        x509cert = settings_info['idp']['x509cert']
-        key = OneLogin_Saml2_Utils.format_cert(x509cert)
+        x509certs = settings_info['idp']['x509certs']
+        for x509cert in x509certs:
+            key = OneLogin_Saml2_Utils.format_cert(x509cert)
 
-        name_id_enc = OneLogin_Saml2_Utils.generate_name_id(name_id_value, None, name_id_format, key)
-        expected_name_id_enc = '<saml:EncryptedID><xenc:EncryptedData Type="http://www.w3.org/2001/04/xmlenc#Element" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/><dsig:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#"><xenc:EncryptedKey><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/><xenc:CipherData><xenc:CipherValue>'
-        self.assertIn(expected_name_id_enc, name_id_enc)
+            name_id_enc = OneLogin_Saml2_Utils.generate_name_id(name_id_value, None, name_id_format, key)
+            expected_name_id_enc = '<saml:EncryptedID><xenc:EncryptedData Type="http://www.w3.org/2001/04/xmlenc#Element" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/><dsig:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#"><xenc:EncryptedKey><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/><xenc:CipherData><xenc:CipherValue>'
+            self.assertIn(expected_name_id_enc, name_id_enc)
 
     def testCalculateX509Fingerprint(self):
         """
@@ -838,11 +841,11 @@ class OneLogin_Saml2_Utils_Test(unittest.TestCase):
         """
         settings = OneLogin_Saml2_Settings(self.loadSettingsJSON())
         idp_data = settings.get_idp_data()
-        cert = idp_data['x509cert']
+        cert = idp_data['x509certs'][0]
 
         settings_2 = OneLogin_Saml2_Settings(self.loadSettingsJSON('settings2.json'))
         idp_data2 = settings_2.get_idp_data()
-        cert_2 = idp_data2['x509cert']
+        cert_2 = idp_data2['x509certs'][0]
         fingerprint_2 = OneLogin_Saml2_Utils.calculate_x509_fingerprint(cert_2)
         fingerprint_2_256 = OneLogin_Saml2_Utils.calculate_x509_fingerprint(cert_2, 'sha256')
 

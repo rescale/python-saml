@@ -61,9 +61,9 @@ class OneLogin_Saml2_Logout_Request(object):
 
             issue_instant = OneLogin_Saml2_Utils.parse_time_to_SAML(OneLogin_Saml2_Utils.now())
 
-            cert = None
+            certs = None
             if 'nameIdEncrypted' in security and security['nameIdEncrypted']:
-                cert = idp_data['x509cert']
+                certs = idp_data['x509certs']
 
             if name_id is not None:
                 nameIdFormat = sp_data['NameIDFormat']
@@ -73,12 +73,20 @@ class OneLogin_Saml2_Logout_Request(object):
                 nameIdFormat = OneLogin_Saml2_Constants.NAMEID_ENTITY
                 spNameQualifier = sp_data['entityId']
 
-            name_id_obj = OneLogin_Saml2_Utils.generate_name_id(
-                name_id,
-                spNameQualifier,
-                nameIdFormat,
-                cert
-            )
+            if certs:
+                name_id_obj = OneLogin_Saml2_Utils.generate_name_id(
+                    name_id,
+                    spNameQualifier,
+                    nameIdFormat,
+                    certs[0]
+                )
+            else:
+                name_id_obj = OneLogin_Saml2_Utils.generate_name_id(
+                    name_id,
+                    spNameQualifier,
+                    nameIdFormat,
+                    None
+                )
 
             if session_index:
                 session_index_str = '<samlp:SessionIndex>%s</samlp:SessionIndex>' % session_index
@@ -325,11 +333,13 @@ class OneLogin_Saml2_Logout_Request(object):
                     signed_query = '%s&RelayState=%s' % (signed_query, OneLogin_Saml2_Utils.get_encoded_parameter(get_data, 'RelayState', lowercase_urlencoding=lowercase_urlencoding))
                 signed_query = '%s&SigAlg=%s' % (signed_query, OneLogin_Saml2_Utils.get_encoded_parameter(get_data, 'SigAlg', OneLogin_Saml2_Constants.RSA_SHA1, lowercase_urlencoding=lowercase_urlencoding))
 
-                if 'x509cert' not in idp_data or idp_data['x509cert'] is None:
+                if 'x509certs' not in idp_data or idp_data['x509certs'] is None:
                     raise Exception('In order to validate the sign on the Logout Request, the x509cert of the IdP is required')
-                cert = idp_data['x509cert']
+                certs = idp_data['x509certs']
 
-                if not OneLogin_Saml2_Utils.validate_binary_sign(signed_query, b64decode(get_data['Signature']), cert, sign_alg):
+                validated = any(OneLogin_Saml2_Utils.validate_binary_sign(signed_query, b64decode(get_data['Signature']), cert, sign_alg)
+                                for cert in certs)
+                if not validated:
                     raise Exception('Signature validation failed. Logout Request rejected')
 
             return True
