@@ -105,7 +105,7 @@ class OneLogin_Saml2_IdPMetadataParser(object):
         dom = fromstring(idp_metadata)
         entity_descriptor_nodes = OneLogin_Saml2_Utils.query(dom, '//md:EntityDescriptor')
 
-        idp_entity_id = want_authn_requests_signed = idp_name_id_format = idp_sso_url = idp_slo_url = idp_x509_cert = None
+        idp_entity_id = want_authn_requests_signed = idp_name_id_format = idp_sso_url = idp_slo_url = idp_x509_certs = None
 
         if len(entity_descriptor_nodes) > 0:
             for entity_descriptor_node in entity_descriptor_nodes:
@@ -138,7 +138,7 @@ class OneLogin_Saml2_IdPMetadataParser(object):
 
                     cert_nodes = OneLogin_Saml2_Utils.query(idp_descriptor_node, "./md:KeyDescriptor[@use='signing']/ds:KeyInfo/ds:X509Data/ds:X509Certificate")
                     if len(cert_nodes) > 0:
-                        idp_x509_cert = cert_nodes[0].text
+                        idp_x509_certs = [cert.text for cert in cert_nodes]
 
                     data['idp'] = {}
 
@@ -155,8 +155,8 @@ class OneLogin_Saml2_IdPMetadataParser(object):
                         data['idp']['singleLogoutService']['url'] = idp_slo_url
                         data['idp']['singleLogoutService']['binding'] = required_slo_binding
 
-                    if idp_x509_cert is not None:
-                        data['idp']['x509cert'] = idp_x509_cert
+                    if idp_x509_certs is not None:
+                        data['idp']['x509certs'] = idp_x509_certs
 
                     if want_authn_requests_signed is not None:
                         data['security'] = {}

@@ -433,7 +433,7 @@ class OneLogin_Saml2_Logout_Request_Test(unittest.TestCase):
 
         request_data['get_data']['Signature'] = old_signature
         settings_info['idp']['certFingerprint'] = 'afe71c28ef740bc87425be13a2263d37971da1f9'
-        del settings_info['idp']['x509cert']
+        del settings_info['idp']['x509certs']
         settings_2 = OneLogin_Saml2_Settings(settings_info)
         try:
             logout_request7 = OneLogin_Saml2_Logout_Request(settings_2, b64encode(request_2))

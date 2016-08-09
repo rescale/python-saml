@@ -344,7 +344,7 @@ class OneLogin_Saml2_Logout_Response_Test(unittest.TestCase):
 
         request_data['get_data']['Signature'] = old_signature
         settings_info['idp']['certFingerprint'] = 'afe71c28ef740bc87425be13a2263d37971da1f9'
-        del settings_info['idp']['x509cert']
+        del settings_info['idp']['x509certs']
         settings_2 = OneLogin_Saml2_Settings(settings_info)
 
         response_10 = OneLogin_Saml2_Logout_Response(settings_2, request_data['get_data']['SAMLResponse'])
@@ -352,7 +352,7 @@ class OneLogin_Saml2_Logout_Response_Test(unittest.TestCase):
             valid = response_10.is_valid(request_data)
             self.assertFalse(valid)
         except Exception as e:
-            self.assertIn('In order to validate the sign on the Logout Response, the x509cert of the IdP is required', e.message)
+            self.assertIn('In order to validate the sign on the Logout Response, the x509certs of the IdP is required', e.message)
 
     def testIsValid(self):
         """
